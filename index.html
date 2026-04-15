@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rice Focus - Pixel Rice Cooker Timer</title>
+<meta name="description" content="A cute pixel-art rice cooker countdown timer with animations and chiptune sounds. Set your cook time, watch the rice go in, and get a musical alert when it's done.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍚</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Press Start 2P', monospace;
+    background: #2a1f14;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #f0deb8;
+  }
+  h1 {
+    font-size: 1.1rem;
+    color: #f8d878;
+    margin-bottom: 0.1rem;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 #805010;
+  }
+  .subtitle { font-size: 0.5rem; color: #b89858; margin-bottom: 0.75rem; }
+  canvas {
+    display: block;
+    border: 4px solid #5a3a1a;
+    border-radius: 4px;
+    background: #f0deb8;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .timer-display {
+    font-size: 2rem;
+    color: #f8d878;
+    margin-top: 0.75rem;
+    text-shadow: 2px 2px 0 #805010;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-label {
+    font-size: 0.5rem;
+    color: #b89858;
+    margin: 0.4rem 0;
+    min-height: 1em;
+  }
+  .presets {
+    display: flex; gap: 0.4rem; margin-bottom: 0.6rem;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .preset-btn {
+    padding: 0.4rem 0.7rem; background: #3a2a18;
+    border: 3px solid #5a3a1a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.5rem; color: #f0deb8; cursor: pointer;
+    transition: background 0.1s, color 0.1s, transform 0.1s;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .preset-btn:hover { background: #5a3a1a; color: #f8d878; transform: scale(1.05); }
+  .controls { display: flex; gap: 0.5rem; align-items: center; }
+  .time-btn {
+    width: 44px; height: 44px; background: #3a2a18;
+    border: 3px solid #5a3a1a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1rem; color: #f0deb8; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .time-btn:hover { background: #5a3a1a; color: #f8d878; }
+  .start-btn {
+    padding: 0.6rem 1.5rem; background: #c83030;
+    border: 3px solid #801818;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem; color: #fff; cursor: pointer;
+    text-shadow: 1px 1px 0 #601010;
+    box-shadow: 0 4px 0 #801818; transition: background 0.1s, transform 0.1s, box-shadow 0.1s;
+    min-height: 44px;
+  }
+  .start-btn:hover { background: #e04040; transform: translateY(-1px); box-shadow: 0 5px 0 #801818; }
+  .start-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #801818; }
+  .start-btn:disabled { background: #666; border-color: #444; box-shadow: 0 4px 0 #444; cursor: not-allowed; }
+  .reset-btn {
+    padding: 0.5rem 1.2rem; background: #3a2a18; min-height: 44px;
+    border: 3px solid #5a3a1a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem; color: #f0deb8; cursor: pointer; margin-top: 0.5rem;
+  }
+  .reset-btn:hover { background: #5a3a1a; color: #f8d878; }
+  .done-message { display: none; text-align: center; margin-top: 0.5rem; }
+  .done-message h2 { font-size: 0.9rem; color: #f8d878; text-shadow: 2px 2px 0 #805010; margin-bottom: 0.3rem; }
+  .done-message p { font-size: 0.45rem; color: #b89858; }
+  .hidden { display: none !important; }
+  .scanlines {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 100;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<h1>RICE FOCUS</h1>
+<p class="subtitle">~ pixel rice cooker timer ~</p>
+<canvas id="scene" width="480" height="360"></canvas>
+<div class="timer-display" id="timerDisplay">25:00</div>
+<div class="timer-label" id="timerLabel">SET YOUR COOKING TIME</div>
+<div class="presets" id="presets">
+  <button class="preset-btn" onclick="setTime(15)">15m</button>
+  <button class="preset-btn" onclick="setTime(20)">20m</button>
+  <button class="preset-btn" onclick="setTime(25)">25m</button>
+  <button class="preset-btn" onclick="setTime(30)">30m</button>
+  <button class="preset-btn" onclick="setTime(45)">45m</button>
+</div>
+<div class="controls" id="controls">
+  <button class="time-btn" onclick="adjustTime(-1)">-</button>
+  <button class="start-btn" id="startBtn" onclick="startCooking()">START</button>
+  <button class="time-btn" onclick="adjustTime(1)">+</button>
+</div>
+<div class="done-message" id="doneMessage">
+  <h2>RICE IS READY!</h2>
+  <p>Your perfectly cooked rice awaits</p>
+  <button class="reset-btn" onclick="resetAll()">COOK AGAIN</button>
+</div>
+
+<script>
+// ===== CONSTANTS =====
+const S = 4;
+const GW = 120, GH = 90;
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+const C = {
+  bg: '#f0deb8', bg2: '#e8d4a8', shadow: '#d8c898',
+  outline: '#483018', outlineL: '#6a5030',
+  bodyHi: '#f8f0e0', bodyMid: '#e8dcc4', bodyLo: '#d0c4a8', bodyDk: '#b8ac90',
+  lidHi: '#f0e8d8', lidMid: '#ddd0b8', lidLo: '#c8bc9c',
+  inner: '#584838', innerLi: '#706050',
+  red: '#d83830', redHi: '#f05848', redDk: '#a02020', redGlow: '#f8e830',
+  base: '#b8a880', baseDk: '#988868',
+  rice: '#f8f0d0', riceDk: '#e0d8b0',
+  water: '#68a8d8', waterLi: '#90c8f0', waterDk: '#4888b0',
+  steam: '#e8e0d4', steamLi: '#f4f0e8',
+  pink: '#f09080', pinkLi: '#f8b0a0',
+  handle: '#a89478', handleDk: '#887858',
+  gold: '#c08820', goldLi: '#e0a830',
+  white: '#f8f4e8', black: '#282018',
+  green: '#58a848', greenDk: '#388028',
+  tableTop: '#c8a870', tableFront: '#a88850', tableEdge: '#887040',
+};
+
+// ===== STATE =====
+let totalSeconds = 25 * 60;
+let remainingSeconds = totalSeconds;
+let timerInterval = null;
+let animState = 'idle';
+let animStart = 0;
+let animFrame = 0;
+
+// Particles
+let grains = [], steams = [], musicNotes = [], sparkles = [];
+
+// Animation state
+let cupX = 96, cupY = 58;
+let jugX = 100, jugY = 56;
+let lidOpen = true;
+let btnPressed = false, btnGlow = false;
+let riceLevel = 0, waterLevel = 0;
+let showCup = true, showJug = false;
+// One-shot event flags
+let chimePlayed = false;
+let notesSpawned = [false, false, false];
+let doneMessageShown = false;
+let melodyPlayed = false;
+
+// ===== HELPERS =====
+function px(x, y, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x * S, y * S, S, S);
+}
+function pxRect(x, y, w, h, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x * S, y * S, w * S, h * S);
+}
+function lerp(a, b, t) { return a + (b - a) * Math.max(0, Math.min(1, t)); }
+function easeOut(t) { return 1 - (1 - t) * (1 - t); }
+function easeIn(t) { return t * t; }
+
+// ===== DRAWING =====
+function drawBackground() {
+  pxRect(0, 0, GW, GH, C.bg);
+  // Floor
+  pxRect(0, 72, GW, 18, C.tableTop);
+  pxRect(0, 74, GW, 16, C.tableFront);
+  pxRect(0, 72, GW, 1, C.tableEdge);
+  pxRect(0, 73, GW, 1, C.bg2);
+  // Wall lines
+  for (let i = 0; i < GW; i += 20) pxRect(i, 0, 1, 72, C.bg2);
+}
+
+function drawCookerBody(bx, by) {
+  // Shadow
+  pxRect(bx - 2, by + 24, 48, 3, C.shadow);
+  // Base
+  pxRect(bx - 2, by + 21, 48, 4, C.outline);
+  pxRect(bx - 1, by + 22, 46, 2, C.base);
+  pxRect(bx - 1, by + 22, 46, 1, C.bodyDk);
+  // Body outline
+  pxRect(bx, by, 44, 22, C.outline);
+  px(bx, by, C.bg); px(bx + 43, by, C.bg);
+  px(bx, by + 21, C.bg); px(bx + 43, by + 21, C.bg);
+  px(bx + 1, by, C.bg); px(bx + 42, by, C.bg);
+  // Body fill
+  pxRect(bx + 2, by + 1, 40, 20, C.bodyMid);
+  pxRect(bx + 1, by + 2, 42, 18, C.bodyMid);
+  // Highlight
+  pxRect(bx + 2, by + 1, 40, 7, C.bodyHi);
+  pxRect(bx + 1, by + 2, 42, 5, C.bodyHi);
+  // Shadow
+  pxRect(bx + 2, by + 17, 40, 4, C.bodyLo);
+  pxRect(bx + 1, by + 18, 42, 2, C.bodyLo);
+  // Face
+  pxRect(bx + 14, by + 7, 2, 3, C.outline); // left eye
+  pxRect(bx + 28, by + 7, 2, 3, C.outline); // right eye
+  px(bx + 14, by + 7, C.white); px(bx + 28, by + 7, C.white); // shine
+  pxRect(bx + 10, by + 11, 4, 2, C.pink); // blush L
+  pxRect(bx + 30, by + 11, 4, 2, C.pink); // blush R
+  px(bx + 19, by + 12, C.outline); // smile
+  pxRect(bx + 20, by + 13, 4, 1, C.outline);
+  px(bx + 24, by + 12, C.outline);
+  // Button
+  const oy = btnPressed ? 1 : 0;
+  if (!btnPressed) pxRect(bx + 18, by + 19, 8, 2, C.redDk);
+  pxRect(bx + 18, by + 14 + oy, 8, 5, C.red);
+  pxRect(bx + 19, by + 14 + oy, 6, 1, C.redHi);
+  px(bx + 18, by + 14 + oy, C.outline); px(bx + 25, by + 14 + oy, C.outline);
+  px(bx + 18, by + 18 + oy, C.outline); px(bx + 25, by + 18 + oy, C.outline);
+  if (btnGlow) pxRect(bx + 21, by + 15 + oy, 2, 2, C.redGlow);
+}
+
+function drawLidClosed(bx, by) {
+  pxRect(bx - 1, by - 11, 46, 12, C.outline);
+  px(bx - 1, by - 11, C.bg); px(bx + 44, by - 11, C.bg);
+  px(bx - 1, by - 10, C.bg); px(bx + 44, by - 10, C.bg);
+  px(bx, by - 11, C.bg); px(bx + 43, by - 11, C.bg);
+  pxRect(bx + 1, by - 10, 42, 10, C.lidMid);
+  pxRect(bx, by - 9, 44, 8, C.lidMid);
+  pxRect(bx + 1, by - 10, 42, 4, C.lidHi);
+  pxRect(bx, by - 9, 44, 3, C.lidHi);
+  pxRect(bx, by - 2, 44, 1, C.lidLo);
+  // Handle
+  pxRect(bx + 16, by - 15, 12, 4, C.outline);
+  pxRect(bx + 17, by - 14, 10, 2, C.handle);
+  pxRect(bx + 17, by - 14, 10, 1, C.bodyHi);
+  // Vent
+  pxRect(bx + 20, by - 13, 4, 1, C.innerLi);
+}
+
+function drawLidOpen(bx, by) {
+  // Parallelogram tilted back-left
+  const lx = bx - 6, ly = by - 36;
+  for (let r = 0; r < 12; r++) {
+    const rx = lx + Math.floor(r * 1.1);
+    const w = 40;
+    pxRect(rx, ly + r, w, 1, C.outline);
+    if (r > 0 && r < 11) {
+      pxRect(rx + 1, ly + r, w - 2, 1, r < 5 ? C.lidHi : C.lidMid);
+    }
+  }
+  // Handle
+  pxRect(lx + 1, ly - 3, 10, 3, C.outline);
+  pxRect(lx + 2, ly - 2, 8, 1, C.handle);
+}
+
+function drawInnerPot(bx, by) {
+  pxRect(bx + 3, by - 2, 38, 5, C.inner);
+  pxRect(bx + 2, by - 1, 40, 3, C.inner);
+  pxRect(bx + 2, by - 2, 40, 1, C.innerLi);
+  if (riceLevel > 0) {
+    const rh = Math.max(1, Math.floor(riceLevel * 3));
+    pxRect(bx + 4, by + 2 - rh, 36, rh, C.rice);
+  }
+  if (waterLevel > 0) {
+    const wh = Math.max(1, Math.floor(waterLevel * 3));
+    pxRect(bx + 4, by + 2 - wh, 36, wh, C.water);
+    pxRect(bx + 5, by + 2 - wh, 34, 1, C.waterLi);
+  }
+}
+
+function drawCup(cx, cy, rice) {
+  if (!showCup) return;
+  cx = Math.floor(cx); cy = Math.floor(cy);
+  pxRect(cx, cy, 12, 14, C.outline);
+  pxRect(cx + 1, cy + 1, 10, 12, C.bodyMid);
+  pxRect(cx + 1, cy + 1, 10, 4, C.bodyHi);
+  // Handle
+  pxRect(cx + 12, cy + 3, 4, 8, C.outline);
+  pxRect(cx + 13, cy + 5, 1, 4, C.bg);
+  if (rice > 0) {
+    const rh = Math.max(1, Math.floor(rice * 9));
+    pxRect(cx + 1, cy + 12 - rh, 10, rh, C.rice);
+    if (rh > 1) pxRect(cx + 2, cy + 12 - rh, 8, 1, C.riceDk);
+  }
+}
+
+function drawJug(jx, jy, water) {
+  if (!showJug) return;
+  jx = Math.floor(jx); jy = Math.floor(jy);
+  pxRect(jx, jy, 10, 16, C.outline);
+  pxRect(jx + 1, jy + 1, 8, 14, C.waterLi);
+  pxRect(jx + 1, jy + 1, 8, 5, '#b8d8f0');
+  pxRect(jx + 9, jy, 4, 3, C.outline);
+  pxRect(jx + 9, jy + 1, 3, 1, C.waterLi);
+  if (water > 0) {
+    const wh = Math.max(1, Math.floor(water * 10));
+    pxRect(jx + 1, jy + 14 - wh, 8, wh, C.water);
+    if (wh > 1) pxRect(jx + 2, jy + 14 - wh, 6, 1, C.waterLi);
+  }
+}
+
+function drawWaterStream(x, y1, y2) {
+  for (let y = y1; y < y2; y++) {
+    const wobble = Math.sin(y * 0.5 + animFrame * 0.3) > 0 ? 1 : 0;
+    pxRect(x + wobble, y, 2, 1, C.water);
+    if (y % 3 === 0) px(x + wobble + 2, y, C.waterLi);
+  }
+}
+
+function drawProgressBar(bx, by, progress) {
+  const barX = bx + 5, barY = by + 19, barW = 34;
+  pxRect(barX, barY, barW, 2, C.bodyDk);
+  const fillW = Math.floor(progress * barW);
+  if (fillW > 0) {
+    pxRect(barX, barY, fillW, 2, C.green);
+    pxRect(barX, barY, fillW, 1, C.greenDk);
+  }
+}
+
+// Particles
+function drawGrainsInPot() {
+  // Draw grains clipped to the pot area (before cooker body covers them)
+  grains.forEach(g => {
+    if (g.life <= 0) return;
+    const gy = Math.floor(g.y);
+    if (gy > BY + 2) return; // don't draw below pot rim
+    ctx.globalAlpha = Math.min(1, g.life);
+    pxRect(Math.floor(g.x), gy, 1, 2, C.rice);
+    ctx.globalAlpha = 1;
+  });
+}
+
+function drawParticles() {
+  // Grains that are still above the pot (falling in the air)
+  grains.forEach(g => {
+    if (g.life <= 0) return;
+    const gy = Math.floor(g.y);
+    if (gy >= BY - 2) return; // drawn by drawGrainsInPot instead
+    ctx.globalAlpha = Math.min(1, g.life);
+    pxRect(Math.floor(g.x), gy, 1, 2, C.rice);
+    ctx.globalAlpha = 1;
+  });
+  steams.forEach(s => {
+    const prog = s.life / s.maxLife;
+    const alpha = prog < 0.3 ? prog / 0.3 : 1 - (prog - 0.3) / 0.7;
+    if (alpha < 0.05) return;
+    const sz = Math.max(2, Math.floor(s.size * (0.6 + prog * 0.6)));
+    ctx.fillStyle = `rgba(235,228,216,${Math.min(0.65, alpha * 0.6)})`;
+    ctx.fillRect(Math.floor(s.x) * S, Math.floor(s.y) * S, sz * S, sz * S);
+    if (sz > 2) {
+      ctx.fillStyle = `rgba(245,240,232,${Math.min(0.5, alpha * 0.45)})`;
+      ctx.fillRect((Math.floor(s.x) + 1) * S, (Math.floor(s.y) + 1) * S, (sz - 2) * S, (sz - 2) * S);
+    }
+  });
+  musicNotes.forEach(n => {
+    const alpha = 1 - n.life / n.maxLife;
+    if (alpha < 0.05) return;
+    ctx.font = `${S * 4}px 'Press Start 2P', monospace`;
+    ctx.fillStyle = n.color;
+    ctx.globalAlpha = alpha;
+    ctx.fillText(n.char, Math.floor(n.x) * S, Math.floor(n.y) * S);
+    ctx.globalAlpha = 1;
+  });
+  sparkles.forEach(sp => {
+    if (sp.life <= 0) return;
+    const sz = Math.max(1, Math.ceil(sp.size * sp.life));
+    ctx.globalAlpha = sp.life;
+    pxRect(Math.floor(sp.x), Math.floor(sp.y), sz, sz, sp.color);
+    ctx.globalAlpha = 1;
+  });
+}
+
+// Particle spawners
+function spawnGrain(x, y) {
+  grains.push({ x: x + Math.random() * 6 - 3, y, vy: 1 + Math.random() * 2, life: 1 });
+}
+function spawnSteam(x, y, size) {
+  steams.push({ x: x + Math.random() * 8 - 4, y, size: size || 3 + Math.random() * 3,
+    vx: (Math.random() - 0.5) * 0.3, vy: -0.3 - Math.random() * 0.4,
+    life: 0, maxLife: 60 + Math.random() * 40 });
+}
+function spawnNote(x, y) {
+  const chars = ['♪', '♫', '♩'];
+  const colors = [C.red, C.gold, C.pink];
+  musicNotes.push({ x, y, char: chars[Math.floor(Math.random() * 3)],
+    color: colors[Math.floor(Math.random() * 3)],
+    vx: (Math.random() - 0.5) * 0.5, vy: -0.5 - Math.random() * 0.3,
+    life: 0, maxLife: 60 });
+}
+function spawnSparkle(x, y) {
+  const colors = [C.gold, C.goldLi, C.red, C.redHi, C.white, C.pink];
+  sparkles.push({ x, y, size: 1 + Math.floor(Math.random() * 3),
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx: (Math.random() - 0.5) * 2, vy: -1 - Math.random() * 2,
+    life: 1, maxLife: 40 + Math.random() * 30 });
+}
+
+function updateParticles() {
+  grains.forEach(g => { g.y += g.vy; g.life -= 0.03; });
+  grains = grains.filter(g => g.life > 0 && g.y < GH);
+  steams.forEach(s => { s.x += s.vx; s.y += s.vy; s.life++; });
+  steams = steams.filter(s => s.life < s.maxLife);
+  musicNotes.forEach(n => { n.x += n.vx; n.y += n.vy; n.life++; });
+  musicNotes = musicNotes.filter(n => n.life < n.maxLife);
+  sparkles.forEach(sp => { sp.x += sp.vx; sp.y += sp.vy; sp.vy += 0.05; sp.life -= 0.02; });
+  sparkles = sparkles.filter(sp => sp.life > 0);
+}
+
+// ===== AUDIO =====
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, start, dur, vol = 0.08) {
+  const ctx = getAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(vol, start);
+  gain.gain.exponentialRampToValueAtTime(0.001, start + dur - 0.02);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(start); osc.stop(start + dur);
+}
+function playStartChime() {
+  const ctx = getAudio(); const now = ctx.currentTime;
+  playTone(523.25, now, 0.15, 0.06);
+  playTone(659.25, now + 0.12, 0.15, 0.06);
+  playTone(783.99, now + 0.24, 0.3, 0.06);
+}
+function playTwinkleTwinkle() {
+  const ctx = getAudio(); const now = ctx.currentTime;
+  const [Cn, D, E, F, G, A] = [523.25, 587.33, 659.25, 698.46, 783.99, 880];
+  const t = 0.3, v = 0.07;
+  const notes = [
+    Cn,Cn,G,G,A,A,G,0, F,F,E,E,D,D,Cn,0,
+    G,G,F,F,E,E,D,0, G,G,F,F,E,E,D,0,
+    Cn,Cn,G,G,A,A,G,0, F,F,E,E,D,D,Cn
+  ];
+  notes.forEach((n, i) => { if (n > 0) playTone(n, now + i * t, t * 0.85, v); });
+  return notes.length * t * 1000;
+}
+
+// ===== ANIMATION STATE MACHINE =====
+const BX = 38, BY = 48; // cooker position
+
+function startAnim(newState) {
+  animState = newState;
+  animStart = performance.now();
+  // Reset one-shot flags for new states
+  if (newState === 'press_btn') {
+    chimePlayed = false;
+    notesSpawned = [false, false, false];
+  }
+  if (newState === 'done') {
+    doneMessageShown = false;
+    melodyPlayed = false;
+  }
+}
+
+function animProgress() {
+  return performance.now() - animStart;
+}
+
+function updateAnimation() {
+  const t = animProgress();
+
+  switch (animState) {
+    case 'idle': lidOpen = true; break;
+
+    case 'pour_rice': {
+      const p = Math.min(t / 2500, 1.2);
+      if (p < 0.3) {
+        cupX = lerp(96, 55, easeOut(p / 0.3));
+        cupY = lerp(58, 20, easeOut(p / 0.3));
+      } else if (p < 0.8) {
+        cupX = 55; cupY = 20;
+        if (animFrame % 3 === 0) spawnGrain(62, 33);
+        riceLevel = lerp(0, 1, (p - 0.3) / 0.5);
+      } else {
+        cupX = lerp(55, -20, easeIn((p - 0.8) / 0.2));
+        cupY = lerp(20, 10, (p - 0.8) / 0.2);
+      }
+      if (p >= 1) {
+        showCup = false; showJug = true;
+        jugX = 100; jugY = 56;
+        startAnim('pour_water');
+        setLabel('ADDING WATER...');
+      }
+      break;
+    }
+
+    case 'pour_water': {
+      const p = Math.min(t / 2500, 1.2);
+      if (p < 0.3) {
+        jugX = lerp(100, 58, easeOut(p / 0.3));
+        jugY = lerp(56, 18, easeOut(p / 0.3));
+      } else if (p < 0.8) {
+        jugX = 58; jugY = 18;
+        waterLevel = lerp(0, 1, (p - 0.3) / 0.5);
+      } else {
+        jugX = lerp(58, -20, easeIn((p - 0.8) / 0.2));
+        jugY = lerp(18, 8, (p - 0.8) / 0.2);
+      }
+      if (p >= 1) {
+        showJug = false;
+        startAnim('close_lid');
+        setLabel('CLOSING LID...');
+      }
+      break;
+    }
+
+    case 'close_lid': {
+      const p = Math.min(t / 800, 1.2);
+      lidOpen = p < 0.8;
+      if (p >= 1) {
+        lidOpen = false;
+        startAnim('press_btn');
+        setLabel('STARTING COOKER...');
+      }
+      break;
+    }
+
+    case 'press_btn': {
+      const p = Math.min(t / 1500, 1.2);
+      if (p > 0.1) btnPressed = true;
+      if (p > 0.25) btnGlow = true;
+      if (p > 0.25 && !chimePlayed) { playStartChime(); chimePlayed = true; }
+      if (p > 0.4 && !notesSpawned[0]) { spawnNote(BX + 22, BY - 15); notesSpawned[0] = true; }
+      if (p > 0.6 && !notesSpawned[1]) { spawnNote(BX + 30, BY - 18); notesSpawned[1] = true; }
+      if (p > 0.8 && !notesSpawned[2]) { spawnNote(BX + 18, BY - 20); notesSpawned[2] = true; }
+      if (p >= 1) {
+        startAnim('cooking');
+        startTimer();
+        setLabel('COOKING...');
+        document.getElementById('controls').classList.add('hidden');
+        document.getElementById('presets').classList.add('hidden');
+      }
+      break;
+    }
+
+    case 'cooking': {
+      const progress = (totalSeconds - remainingSeconds) / totalSeconds;
+      const intensity = Math.min(1, progress * 1.5);
+      const freq = Math.max(2, Math.floor(12 - intensity * 10));
+      if (animFrame % freq === 0) {
+        spawnSteam(BX + 16 + Math.random() * 12, BY - 14, 3 + intensity * 5);
+      }
+      // Extra puffs at higher intensity
+      if (intensity > 0.5 && animFrame % (freq + 2) === 0) {
+        spawnSteam(BX + 14 + Math.random() * 16, BY - 12, 2 + intensity * 3);
+      }
+      break;
+    }
+
+    case 'done': {
+      const p = t / 1000;
+      if (p < 0.6) lidOpen = p > 0.2;
+      else lidOpen = true;
+      if (p < 2 && animFrame % 5 === 0) {
+        spawnSteam(BX + 15 + Math.random() * 14, BY - 16, 5 + Math.random() * 4);
+      }
+      if (!melodyPlayed) { playTwinkleTwinkle(); melodyPlayed = true; }
+      if (p < 15 && animFrame % 18 === 0) {
+        spawnNote(BX + 10 + Math.random() * 24, BY - 20 - Math.random() * 10);
+      }
+      if (p < 5 && animFrame % 5 === 0) {
+        spawnSparkle(Math.random() * GW, Math.random() * GH * 0.7);
+      }
+      if (!doneMessageShown && p > 1) {
+        document.getElementById('doneMessage').style.display = 'block';
+        doneMessageShown = true;
+      }
+      break;
+    }
+  }
+}
+
+// ===== MAIN DRAW =====
+function draw() {
+  drawBackground();
+  if (lidOpen) drawInnerPot(BX, BY);
+  drawGrainsInPot(); // grains inside pot, drawn before body covers them
+  drawCookerBody(BX, BY);
+  if (animState === 'cooking') {
+    drawProgressBar(BX, BY, (totalSeconds - remainingSeconds) / totalSeconds);
+  }
+  if (lidOpen) drawLidOpen(BX, BY);
+  else if (animState !== 'idle' || !lidOpen) drawLidClosed(BX, BY);
+  else drawLidOpen(BX, BY); // idle = open
+
+  // Water stream
+  if (animState === 'pour_water') {
+    const p = animProgress() / 2500;
+    if (p > 0.3 && p < 0.8) drawWaterStream(64, 33, 48);
+  }
+
+  drawCup(cupX, cupY, showCup ? Math.max(0, 1 - riceLevel) : 0);
+  drawJug(jugX, jugY, showJug ? Math.max(0, 1 - waterLevel) : 0);
+  drawParticles();
+}
+
+// ===== GAME LOOP (setInterval for reliability) =====
+function gameLoop() {
+  animFrame++;
+  updateAnimation();
+  updateParticles();
+  draw();
+}
+
+// Use setInterval at ~30fps so it works even when tab isn't focused
+setInterval(gameLoop, 33);
+
+// ===== TIMER =====
+function formatTime(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    remainingSeconds--;
+    document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+    if (remainingSeconds <= 0) {
+      clearInterval(timerInterval);
+      finishCooking();
+    }
+  }, 1000);
+}
+
+function finishCooking() {
+  startAnim('done');
+  setLabel('');
+  btnPressed = false; btnGlow = false;
+}
+
+function setLabel(txt) {
+  document.getElementById('timerLabel').textContent = txt;
+}
+
+// ===== CONTROLS =====
+function setTime(minutes) {
+  if (animState !== 'idle') return;
+  totalSeconds = minutes * 60; remainingSeconds = totalSeconds;
+  document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+}
+function adjustTime(dir) {
+  if (animState !== 'idle') return;
+  totalSeconds = Math.max(60, Math.min(5400, totalSeconds + dir * 60));
+  remainingSeconds = totalSeconds;
+  document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+}
+function startCooking() {
+  if (animState !== 'idle') return;
+  document.getElementById('startBtn').disabled = true;
+  setLabel('PREPARING RICE...');
+  startAnim('pour_rice');
+}
+function resetAll() {
+  clearInterval(timerInterval);
+  animState = 'idle'; totalSeconds = 25 * 60; remainingSeconds = totalSeconds;
+  document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+  setLabel('SET YOUR COOKING TIME');
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('doneMessage').style.display = 'none';
+  document.getElementById('controls').classList.remove('hidden');
+  document.getElementById('presets').classList.remove('hidden');
+  cupX = 96; cupY = 58; showCup = true;
+  jugX = 100; jugY = 56; showJug = false;
+  lidOpen = true; btnPressed = false; btnGlow = false;
+  riceLevel = 0; waterLevel = 0;
+  grains = []; steams = []; musicNotes = []; sparkles = [];
+  chimePlayed = false; notesSpawned = [false, false, false];
+  doneMessageShown = false; melodyPlayed = false;
+}
+</script>
+</body>
+</html>
