@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <style>
+      .bg { fill: #2a1f14; }
+      .panel { fill: #f0deb8; }
+      .border { fill: #5a3a1a; }
+      .title { font-family: 'Press Start 2P', monospace, sans-serif; fill: #f8d878; font-size: 84px; font-weight: 700; letter-spacing: 6px; }
+      .sub { font-family: 'Press Start 2P', monospace, sans-serif; fill: #b89858; font-size: 28px; letter-spacing: 4px; }
+      .timer { font-family: 'Press Start 2P', monospace, sans-serif; fill: #f8d878; font-size: 120px; letter-spacing: 8px; }
+      .body-mid { fill: #e8dcc4; }
+      .body-hi { fill: #f8f0e0; }
+      .body-lo { fill: #d0c4a8; }
+      .lid-mid { fill: #ddd0b8; }
+      .lid-hi { fill: #f0e8d8; }
+      .outline { fill: #483018; }
+      .red { fill: #d83830; }
+      .red-hi { fill: #f05848; }
+      .pink { fill: #f09080; }
+      .white { fill: #f8f4e8; }
+      .handle { fill: #a89478; }
+      .base { fill: #b8a880; }
+      .table-top { fill: #c8a870; }
+      .rice { fill: #f8f0d0; }
+    </style>
+  </defs>
+  <!-- Background -->
+  <rect class="bg" width="1200" height="630"/>
+
+  <!-- Title text shadow -->
+  <text class="title" x="60" y="120" style="fill: #805010">RICE FOCUS</text>
+  <text class="title" x="56" y="116">RICE FOCUS</text>
+  <text class="sub" x="60" y="170">~ PIXEL RICE COOKER TIMER ~</text>
+
+  <!-- Big timer -->
+  <text class="timer" x="60" y="380" style="fill: #805010">25:00</text>
+  <text class="timer" x="56" y="376">25:00</text>
+  <text class="sub" x="60" y="430">COOKING...</text>
+
+  <!-- Pixel rice cooker (scaled-up pixel art, ~16px = 1 pixel) -->
+  <g transform="translate(700, 180) scale(11)">
+    <!-- Floor table -->
+    <rect class="table-top" x="-6" y="26" width="56" height="6"/>
+    <!-- Shadow -->
+    <rect class="border" x="-2" y="22" width="48" height="3"/>
+    <!-- Base -->
+    <rect class="outline" x="-2" y="21" width="48" height="4"/>
+    <rect class="base" x="-1" y="22" width="46" height="2"/>
+    <!-- Body outline -->
+    <rect class="outline" x="0" y="0" width="44" height="22"/>
+    <rect class="bg" x="0" y="0" width="2" height="1"/>
+    <rect class="bg" x="42" y="0" width="2" height="1"/>
+    <!-- Body fill -->
+    <rect class="body-mid" x="2" y="1" width="40" height="20"/>
+    <rect class="body-mid" x="1" y="2" width="42" height="18"/>
+    <!-- Highlight -->
+    <rect class="body-hi" x="2" y="1" width="40" height="7"/>
+    <rect class="body-hi" x="1" y="2" width="42" height="5"/>
+    <!-- Shadow band -->
+    <rect class="body-lo" x="2" y="17" width="40" height="4"/>
+    <rect class="body-lo" x="1" y="18" width="42" height="2"/>
+    <!-- Eyes -->
+    <rect class="outline" x="14" y="7" width="2" height="3"/>
+    <rect class="outline" x="28" y="7" width="2" height="3"/>
+    <rect class="white" x="14" y="7" width="1" height="1"/>
+    <rect class="white" x="28" y="7" width="1" height="1"/>
+    <!-- Blush -->
+    <rect class="pink" x="10" y="11" width="4" height="2"/>
+    <rect class="pink" x="30" y="11" width="4" height="2"/>
+    <!-- Smile -->
+    <rect class="outline" x="19" y="12" width="1" height="1"/>
+    <rect class="outline" x="20" y="13" width="4" height="1"/>
+    <rect class="outline" x="24" y="12" width="1" height="1"/>
+    <!-- Button -->
+    <rect class="outline" x="18" y="14" width="8" height="5"/>
+    <rect class="red" x="18" y="14" width="8" height="5"/>
+    <rect class="red-hi" x="19" y="14" width="6" height="1"/>
+
+    <!-- Lid -->
+    <rect class="outline" x="-1" y="-11" width="46" height="12"/>
+    <rect class="bg" x="-1" y="-11" width="2" height="1"/>
+    <rect class="bg" x="43" y="-11" width="2" height="1"/>
+    <rect class="lid-mid" x="1" y="-10" width="42" height="10"/>
+    <rect class="lid-hi" x="1" y="-10" width="42" height="4"/>
+    <!-- Handle -->
+    <rect class="outline" x="16" y="-15" width="12" height="4"/>
+    <rect class="handle" x="17" y="-14" width="10" height="2"/>
+  </g>
+
+  <!-- Steam puffs -->
+  <g opacity="0.7">
+    <rect x="800" y="80" width="40" height="40" rx="20" fill="#e8e0d4"/>
+    <rect x="850" y="50" width="50" height="50" rx="25" fill="#f4f0e8"/>
+    <rect x="910" y="80" width="36" height="36" rx="18" fill="#e8e0d4"/>
+  </g>
+
+  <!-- Rice grain icon corner -->
+  <g transform="translate(1080, 540)">
+    <rect class="rice" x="0" y="0" width="60" height="36" rx="18"/>
+    <rect class="outline" x="6" y="6" width="6" height="6"/>
+    <rect class="outline" x="22" y="14" width="6" height="6"/>
+    <rect class="outline" x="42" y="6" width="6" height="6"/>
+  </g>
+</svg>

@@ -5,7 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rice Focus - Pixel Rice Cooker Timer</title>
 <meta name="description" content="A cute pixel-art rice cooker countdown timer with animations and chiptune sounds. Set your cook time, watch the rice go in, and get a musical alert when it's done.">
+<meta name="theme-color" content="#2a1f14">
+<link rel="canonical" href="https://rice-cooker-timer.vercel.app/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍚</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍚</text></svg>">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rice-cooker-timer.vercel.app/">
+<meta property="og:title" content="Rice Focus - Pixel Rice Cooker Timer">
+<meta property="og:description" content="A cute pixel-art rice cooker countdown timer with animations and chiptune sounds. Cook the perfect rice while watching tiny pixel grains pour in.">
+<meta property="og:image" content="https://rice-cooker-timer.vercel.app/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Rice Focus">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://rice-cooker-timer.vercel.app/">
+<meta name="twitter:title" content="Rice Focus - Pixel Rice Cooker Timer">
+<meta name="twitter:description" content="A cute pixel-art rice cooker countdown timer with animations and chiptune sounds.">
+<meta name="twitter:image" content="https://rice-cooker-timer.vercel.app/og-image.svg">
+
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -103,29 +124,31 @@
 </style>
 </head>
 <body>
-<div class="scanlines"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<main>
 <h1>RICE FOCUS</h1>
 <p class="subtitle">~ pixel rice cooker timer ~</p>
-<canvas id="scene" width="480" height="360"></canvas>
-<div class="timer-display" id="timerDisplay">25:00</div>
-<div class="timer-label" id="timerLabel">SET YOUR COOKING TIME</div>
-<div class="presets" id="presets">
-  <button class="preset-btn" onclick="setTime(15)">15m</button>
-  <button class="preset-btn" onclick="setTime(20)">20m</button>
-  <button class="preset-btn" onclick="setTime(25)">25m</button>
-  <button class="preset-btn" onclick="setTime(30)">30m</button>
-  <button class="preset-btn" onclick="setTime(45)">45m</button>
+<canvas id="scene" width="480" height="360" aria-label="Pixel art rice cooker scene"></canvas>
+<div class="timer-display" id="timerDisplay" role="timer" aria-live="off" aria-label="Cooking time remaining">25:00</div>
+<div class="timer-label" id="timerLabel" aria-live="polite">SET YOUR COOKING TIME</div>
+<div class="presets" id="presets" aria-label="Time presets">
+  <button class="preset-btn" onclick="setTime(15)" aria-label="Set 15 minutes">15m</button>
+  <button class="preset-btn" onclick="setTime(20)" aria-label="Set 20 minutes">20m</button>
+  <button class="preset-btn" onclick="setTime(25)" aria-label="Set 25 minutes">25m</button>
+  <button class="preset-btn" onclick="setTime(30)" aria-label="Set 30 minutes">30m</button>
+  <button class="preset-btn" onclick="setTime(45)" aria-label="Set 45 minutes">45m</button>
 </div>
 <div class="controls" id="controls">
-  <button class="time-btn" onclick="adjustTime(-1)">-</button>
+  <button class="time-btn" onclick="adjustTime(-1)" aria-label="Subtract 1 minute">-</button>
   <button class="start-btn" id="startBtn" onclick="startCooking()">START</button>
-  <button class="time-btn" onclick="adjustTime(1)">+</button>
+  <button class="time-btn" onclick="adjustTime(1)" aria-label="Add 1 minute">+</button>
 </div>
-<div class="done-message" id="doneMessage">
+<div class="done-message" id="doneMessage" role="status">
   <h2>RICE IS READY!</h2>
   <p>Your perfectly cooked rice awaits</p>
   <button class="reset-btn" onclick="resetAll()">COOK AGAIN</button>
 </div>
+</main>
 
 <script>
 // ===== CONSTANTS =====
