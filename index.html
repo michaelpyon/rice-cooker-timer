@@ -82,8 +82,18 @@
     transition: background 0.1s, color 0.1s, transform 0.1s;
     min-height: 44px;
     min-width: 44px;
+    line-height: 1.6;
+    text-align: center;
   }
   .preset-btn:hover { background: #5a3a1a; color: #f8d878; transform: scale(1.05); }
+  .preset-label {
+    display: block;
+    font-size: 0.4rem;
+    color: #b89858;
+    margin-top: 0.1rem;
+    letter-spacing: 0;
+  }
+  .preset-btn:hover .preset-label { color: #f8d878; }
   .controls { display: flex; gap: 0.5rem; align-items: center; }
   .time-btn {
     width: 44px; height: 44px; background: #3a2a18;
@@ -132,11 +142,11 @@
 <div class="timer-display" id="timerDisplay" role="timer" aria-live="off" aria-label="Cooking time remaining">25:00</div>
 <div class="timer-label" id="timerLabel" aria-live="polite">SET YOUR COOKING TIME</div>
 <div class="presets" id="presets" aria-label="Time presets">
-  <button class="preset-btn" onclick="setTime(15)" aria-label="Set 15 minutes">15m</button>
-  <button class="preset-btn" onclick="setTime(20)" aria-label="Set 20 minutes">20m</button>
-  <button class="preset-btn" onclick="setTime(25)" aria-label="Set 25 minutes">25m</button>
-  <button class="preset-btn" onclick="setTime(30)" aria-label="Set 30 minutes">30m</button>
-  <button class="preset-btn" onclick="setTime(45)" aria-label="Set 45 minutes">45m</button>
+  <button class="preset-btn" onclick="setTime(15)" aria-label="Set 15 minutes for sushi rice">15m<span class="preset-label">SUSHI</span></button>
+  <button class="preset-btn" onclick="setTime(20)" aria-label="Set 20 minutes for white rice">20m<span class="preset-label">WHITE</span></button>
+  <button class="preset-btn" onclick="setTime(25)" aria-label="Set 25 minutes for jasmine or basmati rice">25m<span class="preset-label">JASMINE</span></button>
+  <button class="preset-btn" onclick="setTime(30)" aria-label="Set 30 minutes for long grain rice">30m<span class="preset-label">LONG GRAIN</span></button>
+  <button class="preset-btn" onclick="setTime(45)" aria-label="Set 45 minutes for brown rice">45m<span class="preset-label">BROWN</span></button>
 </div>
 <div class="controls" id="controls">
   <button class="time-btn" onclick="adjustTime(-1)" aria-label="Subtract 1 minute">-</button>
