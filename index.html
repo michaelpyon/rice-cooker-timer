@@ -731,6 +731,43 @@ function resetAll() {
   chimePlayed = false; notesSpawned = [false, false, false];
   doneMessageShown = false; melodyPlayed = false;
 }
+
+// ===== KEYBOARD SUPPORT =====
+document.addEventListener('keydown', function(e) {
+  // Ignore if a button or link has focus (let browser handle it)
+  const tag = document.activeElement && document.activeElement.tagName;
+  if (tag === 'BUTTON' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' &&
+      e.key !== '-' && e.key !== '+' && e.key !== '=') return;
+
+  switch (e.key) {
+    case 'ArrowLeft':
+    case '-':
+      e.preventDefault();
+      adjustTime(-1);
+      break;
+    case 'ArrowRight':
+    case '+':
+    case '=':
+      e.preventDefault();
+      adjustTime(1);
+      break;
+    case 'Enter':
+    case ' ':
+      if (animState === 'idle') {
+        e.preventDefault();
+        startCooking();
+      }
+      break;
+    case 'r':
+    case 'R':
+    case 'Escape':
+      if (animState === 'done') {
+        e.preventDefault();
+        resetAll();
+      }
+      break;
+  }
+});
 </script>
 </body>
 </html>
