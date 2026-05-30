@@ -126,6 +126,16 @@
   .done-message h2 { font-size: 0.9rem; color: #f8d878; text-shadow: 2px 2px 0 #805010; margin-bottom: 0.3rem; }
   .done-message p { font-size: 0.45rem; color: #b89858; }
   .hidden { display: none !important; }
+  .kb-hint {
+    display: none;
+    font-size: 0.35rem;
+    color: #6a5030;
+    margin-top: 0.5rem;
+    letter-spacing: 0.5px;
+  }
+  @media (hover: hover) {
+    .kb-hint { display: block; }
+  }
   .scanlines {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 100;
@@ -158,6 +168,7 @@
   <p>Your perfectly cooked rice awaits</p>
   <button class="reset-btn" onclick="resetAll()">COOK AGAIN</button>
 </div>
+<p class="kb-hint" id="kbHint" aria-hidden="true">ARROWS: +/- TIME &nbsp;|&nbsp; ENTER: START</p>
 </main>
 
 <script>
@@ -593,6 +604,7 @@ function updateAnimation() {
         setLabel('COOKING...');
         document.getElementById('controls').classList.add('hidden');
         document.getElementById('presets').classList.add('hidden');
+        document.getElementById('kbHint').classList.add('hidden');
       }
       break;
     }
@@ -697,10 +709,18 @@ function setLabel(txt) {
 }
 
 // ===== CONTROLS =====
+let presetLabelTimer = null;
 function setTime(minutes) {
   if (animState !== 'idle') return;
   totalSeconds = minutes * 60; remainingSeconds = totalSeconds;
   document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+  // Flash confirmation in label area
+  setLabel(minutes + ' MIN SET');
+  if (presetLabelTimer) clearTimeout(presetLabelTimer);
+  presetLabelTimer = setTimeout(function() {
+    if (animState === 'idle') setLabel('SET YOUR COOKING TIME');
+    presetLabelTimer = null;
+  }, 1200);
 }
 function adjustTime(dir) {
   if (animState !== 'idle') return;
@@ -723,6 +743,7 @@ function resetAll() {
   document.getElementById('doneMessage').style.display = 'none';
   document.getElementById('controls').classList.remove('hidden');
   document.getElementById('presets').classList.remove('hidden');
+  document.getElementById('kbHint').classList.remove('hidden');
   cupX = 96; cupY = 58; showCup = true;
   jugX = 100; jugY = 56; showJug = false;
   lidOpen = true; btnPressed = false; btnGlow = false;

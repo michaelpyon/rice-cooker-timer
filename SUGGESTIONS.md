@@ -23,15 +23,20 @@ The live URL (https://rice-cooker-timer.vercel.app) still serves the OLD build w
 
 Keyboard support for +/- adjuster was explicitly flagged as deferred in the prior pass notes. It was NOT in the code before this pass. Now implemented.
 
+## Shipped Wave 2
+
+- **Preset label flash**: clicking a time preset now flashes "XX MIN SET" in the timer-label for 1.2 seconds, confirming the selection registered.
+- **Keyboard hint**: a subtle "ARROWS: +/- TIME | ENTER: START" line appears below controls on non-touch (hover-capable) devices using `@media (hover: hover)`. Hidden during cooking, restored on reset.
+
 ## Prioritized Plan
 
 ### Quick Wins (S effort, no deploy needed to verify logic)
 
 1. **[DONE this pass] Keyboard shortcuts** - Arrow left/right and -/+/= adjust time by 1 min; Enter/Space starts cooking when idle; R/Escape resets after done. Zero dependencies, pure additive JS. Effort: S. Deploy needed: yes (to go live, already pushed to repo).
 
-2. **Timer label feedback during preset selection** - When user clicks a preset, flash a brief "XX MIN SET" confirmation in the timer-label area, so they know the button registered. Currently there is no feedback other than the timer number changing. Effort: S. Deploy needed: yes.
+2. **[DONE wave 2] Timer label feedback during preset selection** - Flashes "XX MIN SET" in the timer-label area for 1.2 seconds when a preset button is clicked, then restores "SET YOUR COOKING TIME". Shipped.
 
-3. **Visible keyboard hint** - Add a tiny line below the controls like "ARROWS: +/- TIME | ENTER: START" that appears only on non-touch devices (check `matchMedia('(hover:hover)')`). Low-noise, helps discoverability. Effort: S. Deploy needed: yes.
+3. **[DONE wave 2] Visible keyboard hint** - Added "ARROWS: +/- TIME | ENTER: START" below controls, visible only on hover-capable (non-touch) devices via CSS media query. Hidden during cooking, restored on reset. Shipped.
 
 ### Medium Wins (M effort)
 
