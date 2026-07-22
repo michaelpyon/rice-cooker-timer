@@ -6,7 +6,7 @@ Live: https://rice-cooker-timer.vercel.app
 
 ## Features
 
-- Pixel-art rice cooker animation (pour rice, add water, close lid, cook)
+- Pixel-art rice cooker animation (tipped-cup rice and water pours, close lid, cook)
 - Chiptune sound effects (start chime + Twinkle Twinkle when done)
 - Preset times (15, 20, 25, 30, 45 min) plus +/- 1 min adjuster
 - Responsive portrait and short-landscape layouts with 44px touch targets

@@ -293,6 +293,7 @@ let grains = [], steams = [], musicNotes = [], sparkles = [];
 // Animation state
 let cupX = 96, cupY = 58;
 let jugX = 100, jugY = 56;
+let cupTilt = 0, jugTilt = 0;
 let lidOpen = true;
 let btnPressed = false, btnGlow = false;
 let riceLevel = 0, waterLevel = 0;
@@ -329,6 +330,9 @@ function pxRect(x, y, w, h, color) {
 function lerp(a, b, t) { return a + (b - a) * Math.max(0, Math.min(1, t)); }
 function easeOut(t) { return 1 - (1 - t) * (1 - t); }
 function easeIn(t) { return t * t; }
+function steppedAngle(angle, steps = 6) {
+  return Math.round(angle * steps) / steps;
+}
 
 // ===== DRAWING =====
 function drawBackground() {
@@ -431,9 +435,13 @@ function drawInnerPot(bx, by) {
   }
 }
 
-function drawCup(cx, cy, rice) {
+function drawCup(cx, cy, rice, tilt = 0) {
   if (!showCup) return;
   cx = Math.floor(cx); cy = Math.floor(cy);
+  ctx.save();
+  ctx.translate((cx + 12) * S, cy * S);
+  ctx.rotate(tilt);
+  ctx.translate(-(cx + 12) * S, -cy * S);
   pxRect(cx, cy, 12, 14, C.outline);
   pxRect(cx + 1, cy + 1, 10, 12, C.bodyMid);
   pxRect(cx + 1, cy + 1, 10, 4, C.bodyHi);
@@ -445,11 +453,16 @@ function drawCup(cx, cy, rice) {
     pxRect(cx + 1, cy + 12 - rh, 10, rh, C.rice);
     if (rh > 1) pxRect(cx + 2, cy + 12 - rh, 8, 1, C.riceDk);
   }
+  ctx.restore();
 }
 
-function drawJug(jx, jy, water) {
+function drawJug(jx, jy, water, tilt = 0) {
   if (!showJug) return;
   jx = Math.floor(jx); jy = Math.floor(jy);
+  ctx.save();
+  ctx.translate((jx + 12) * S, (jy + 1) * S);
+  ctx.rotate(tilt);
+  ctx.translate(-(jx + 12) * S, -(jy + 1) * S);
   pxRect(jx, jy, 10, 16, C.outline);
   pxRect(jx + 1, jy + 1, 8, 14, C.waterLi);
   pxRect(jx + 1, jy + 1, 8, 5, '#b8d8f0');
@@ -460,6 +473,7 @@ function drawJug(jx, jy, water) {
     pxRect(jx + 1, jy + 14 - wh, 8, wh, C.water);
     if (wh > 1) pxRect(jx + 2, jy + 14 - wh, 6, 1, C.waterLi);
   }
+  ctx.restore();
 }
 
 function drawWaterStream(x, y1, y2) {
@@ -622,6 +636,8 @@ function playTwinkleTwinkle() {
 
 // ===== ANIMATION STATE MACHINE =====
 const BX = 38, BY = 48; // cooker position
+const CUP_POUR_X = 55, CUP_POUR_Y = 12;
+const JUG_POUR_X = 58, JUG_POUR_Y = 12;
 
 function startAnim(newState) {
   animState = newState;
@@ -650,18 +666,25 @@ function updateAnimation() {
     case 'pour_rice': {
       const p = Math.min(t / 2500, 1.2);
       if (p < 0.3) {
-        cupX = lerp(96, 55, easeOut(p / 0.3));
-        cupY = lerp(58, 20, easeOut(p / 0.3));
+        cupX = lerp(96, CUP_POUR_X, easeOut(p / 0.3));
+        cupY = lerp(58, CUP_POUR_Y, easeOut(p / 0.3));
+        cupTilt = 0;
+      } else if (p < 0.42) {
+        cupX = CUP_POUR_X; cupY = CUP_POUR_Y;
+        cupTilt = steppedAngle(lerp(0, 1.05, (p - 0.3) / 0.12));
       } else if (p < 0.8) {
-        cupX = 55; cupY = 20;
-        if (animFrame % 3 === 0) spawnGrain(62, 33);
-        riceLevel = lerp(0, 1, (p - 0.3) / 0.5);
+        cupX = CUP_POUR_X; cupY = CUP_POUR_Y;
+        cupTilt = 1.05;
+        if (animFrame % 3 === 0) spawnGrain(cupX + 12, cupY + 2);
+        riceLevel = lerp(0, 1, (p - 0.42) / 0.38);
       } else {
-        cupX = lerp(55, -20, easeIn((p - 0.8) / 0.2));
-        cupY = lerp(20, 10, (p - 0.8) / 0.2);
+        cupX = lerp(CUP_POUR_X, -20, easeIn((p - 0.8) / 0.2));
+        cupY = lerp(CUP_POUR_Y, 8, (p - 0.8) / 0.2);
+        cupTilt = 1.05;
       }
       if (p >= 1) {
         showCup = false; showJug = true;
+        cupTilt = 0;
         jugX = 100; jugY = 56;
         startAnim('pour_water');
         setLabel('ADDING WATER...');
@@ -672,17 +695,24 @@ function updateAnimation() {
     case 'pour_water': {
       const p = Math.min(t / 2500, 1.2);
       if (p < 0.3) {
-        jugX = lerp(100, 58, easeOut(p / 0.3));
-        jugY = lerp(56, 18, easeOut(p / 0.3));
+        jugX = lerp(100, JUG_POUR_X, easeOut(p / 0.3));
+        jugY = lerp(56, JUG_POUR_Y, easeOut(p / 0.3));
+        jugTilt = 0;
+      } else if (p < 0.42) {
+        jugX = JUG_POUR_X; jugY = JUG_POUR_Y;
+        jugTilt = steppedAngle(lerp(0, 1.05, (p - 0.3) / 0.12));
       } else if (p < 0.8) {
-        jugX = 58; jugY = 18;
-        waterLevel = lerp(0, 1, (p - 0.3) / 0.5);
+        jugX = JUG_POUR_X; jugY = JUG_POUR_Y;
+        jugTilt = 1.05;
+        waterLevel = lerp(0, 1, (p - 0.42) / 0.38);
       } else {
-        jugX = lerp(58, -20, easeIn((p - 0.8) / 0.2));
-        jugY = lerp(18, 8, (p - 0.8) / 0.2);
+        jugX = lerp(JUG_POUR_X, -20, easeIn((p - 0.8) / 0.2));
+        jugY = lerp(JUG_POUR_Y, 8, (p - 0.8) / 0.2);
+        jugTilt = 1.05;
       }
       if (p >= 1) {
         showJug = false;
+        jugTilt = 0;
         startAnim('close_lid');
         setLabel('CLOSING LID...');
       }
@@ -772,11 +802,13 @@ function draw() {
   // Water stream
   if (animState === 'pour_water') {
     const p = animProgress() / 2500;
-    if (p > 0.3 && p < 0.8) drawWaterStream(64, 33, 48);
+    if (p > 0.42 && p < 0.8) {
+      drawWaterStream(Math.floor(jugX + 12), Math.floor(jugY + 2), 48);
+    }
   }
 
-  drawCup(cupX, cupY, showCup ? Math.max(0, 1 - riceLevel) : 0);
-  drawJug(jugX, jugY, showJug ? Math.max(0, 1 - waterLevel) : 0);
+  drawCup(cupX, cupY, showCup ? Math.max(0, 1 - riceLevel) : 0, cupTilt);
+  drawJug(jugX, jugY, showJug ? Math.max(0, 1 - waterLevel) : 0, jugTilt);
   drawParticles();
 }
 
@@ -890,6 +922,7 @@ function resetAll() {
   document.getElementById('kbHint').classList.remove('hidden');
   cupX = 96; cupY = 58; showCup = true;
   jugX = 100; jugY = 56; showJug = false;
+  cupTilt = 0; jugTilt = 0;
   lidOpen = true; btnPressed = false; btnGlow = false;
   riceLevel = 0; waterLevel = 0;
   grains = []; steams = []; musicNotes = []; sparkles = [];

@@ -16,7 +16,7 @@ The product IS the landing page. No marketing section, no feature list. The cook
 ## Key screens (states of the 1 page)
 
 1. **Idle / set**: face awake, presets and adjuster active, subtle idle animation (blink or steam wisp) so the page never looks dead in a screenshot.
-2. **Starting**: pour rice, add water, close lid sequence + start chime. This is the "it responded to me" moment; it must run on the same tap that starts the timer (which also unlocks Web Audio).
+2. **Starting**: tip the rice cup and water jug around their lips, pour from each lip into the open pot, close the lid, then play the start chime. This is the "it responded to me" moment; it must run on the same tap that starts the timer (which also unlocks Web Audio).
 3. **Cooking**: countdown in golden tabular digits, cooker bubbles/steams in stepped frames, setup controls leave the interaction path, and the tab title mirrors remaining time (for example, "12:40 | Rice Focus"). Timer truth comes from an absolute wall-clock deadline set on the START tap, not interval tick counts.
 4. **Done / celebration**: "RICE IS READY!", face lights up, steam burst, Twinkle Twinkle chiptune. Hold this state until the user acts; never auto-reset. This is the screenshot frame.
 5. **Post-done**: SHARE FINISH uses native sharing when available and a clipboard fallback otherwise. COOK AGAIN restores the last valid duration.
