@@ -43,7 +43,7 @@ The 4 seconds after 0:00. Engineering targets: (a) the celebration must look com
 
 This product makes no real-data claims: no APIs, no fetch, no "live" or "updated" language, no fabricated stats. Cook times are presented as friendly presets, not sourced authority; keep it that way (do not add "chef-approved" or similar without a source). Nothing requires disclosure.
 
-**Deploy truth (2026-07-22)**: product commit `a6fd331` is live as Vercel deployment `dpl_6jSNyq5SinhhUgDGDPf8ApHYScht` at `rice-cooker-timer.vercel.app`. Two production builds were byte-identical, the stable URL passed the same 67/67 browser matrix, all 3 public files match the gated hashes, and all 9 private-path probes return 404.
+**Deploy truth (2026-07-22)**: product commit `6223a55` is live as Vercel deployment `dpl_FUgaPp8cqkAiVJ4rpmaP5XvZoHrH` at `rice-cooker-timer.vercel.app`. Two production builds were byte-identical; desktop, phone, and reduced-motion pour regressions passed on the stable URL; all 3 public files match the gated hashes; and all private-path probes return 404.
 
 ## Carried-forward build queue (from SUGGESTIONS.md, still valid)
 
