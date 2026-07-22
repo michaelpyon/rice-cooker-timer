@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rice Focus - Pixel Rice Cooker Timer</title>
-<meta name="description" content="A cute pixel-art rice cooker countdown timer with animations and chiptune sounds. Set your cook time, watch the rice go in, and get a musical alert when it's done.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rice Focus | Pixel Rice Cooker Timer</title>
+<meta name="description" content="A cozy pixel rice cooker that keeps honest time and sings when your rice is ready.">
 <meta name="theme-color" content="#2a1f14">
 <link rel="canonical" href="https://rice-cooker-timer.vercel.app/">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍚</text></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍚</text></svg>">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rice-cooker-timer.vercel.app/">
-<meta property="og:title" content="Rice Focus - Pixel Rice Cooker Timer">
-<meta property="og:description" content="A cute pixel-art rice cooker countdown timer with animations and chiptune sounds. Cook the perfect rice while watching tiny pixel grains pour in.">
+<meta property="og:title" content="Rice Focus | Pixel Rice Cooker Timer">
+<meta property="og:description" content="Set the time. Watch the tiny cooker work. Hear it sing when your rice is ready.">
 <meta property="og:image" content="https://rice-cooker-timer.vercel.app/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,23 +22,37 @@
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://rice-cooker-timer.vercel.app/">
-<meta name="twitter:title" content="Rice Focus - Pixel Rice Cooker Timer">
-<meta name="twitter:description" content="A cute pixel-art rice cooker countdown timer with animations and chiptune sounds.">
+<meta name="twitter:title" content="Rice Focus | Pixel Rice Cooker Timer">
+<meta name="twitter:description" content="A tiny pixel rice cooker that keeps honest time and sings at the finish.">
 <meta name="twitter:image" content="https://rice-cooker-timer.vercel.app/og-image.png">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #2a1f14; }
   body {
     font-family: 'Press Start 2P', monospace;
     background: #2a1f14;
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow-x: hidden;
     color: #f0deb8;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  main {
+    width: min(480px, 100%);
+    display: grid;
+    grid-template-areas: "brand" "scene" "panel";
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  .brand-block {
+    grid-area: brand;
   }
   h1 {
     font-size: 1.1rem;
@@ -50,13 +63,18 @@
   }
   .subtitle { font-size: 0.5rem; color: #b89858; margin-bottom: 0.75rem; }
   canvas {
+    grid-area: scene;
     display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
     border: 4px solid #5a3a1a;
     border-radius: 4px;
     background: #f0deb8;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
   }
+  .timer-panel { grid-area: panel; min-width: 0; }
   .timer-display {
     font-size: 2rem;
     color: #f8d878;
@@ -107,14 +125,14 @@
     padding: 0.6rem 1.5rem; background: #c83030;
     border: 3px solid #801818;
     font-family: 'Press Start 2P', monospace;
-    font-size: 0.6rem; color: #fff; cursor: pointer;
+    font-size: 0.6rem; color: #f8f4e8; cursor: pointer;
     text-shadow: 1px 1px 0 #601010;
     box-shadow: 0 4px 0 #801818; transition: background 0.1s, transform 0.1s, box-shadow 0.1s;
     min-height: 44px;
   }
   .start-btn:hover { background: #e04040; transform: translateY(-1px); box-shadow: 0 5px 0 #801818; }
   .start-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #801818; }
-  .start-btn:disabled { background: #666; border-color: #444; box-shadow: 0 4px 0 #444; cursor: not-allowed; }
+  .start-btn:disabled { background: #6a6258; border-color: #4a4238; box-shadow: 0 4px 0 #4a4238; cursor: not-allowed; }
   .reset-btn {
     padding: 0.5rem 1.2rem; background: #3a2a18; min-height: 44px;
     border: 3px solid #5a3a1a;
@@ -122,9 +140,24 @@
     font-size: 0.55rem; color: #f0deb8; cursor: pointer; margin-top: 0.5rem;
   }
   .reset-btn:hover { background: #5a3a1a; color: #f8d878; }
-  .done-message { display: none; text-align: center; margin-top: 0.5rem; }
+  .done-message { display: none; text-align: left; margin-top: 0.65rem; }
   .done-message h2 { font-size: 0.9rem; color: #f8d878; text-shadow: 2px 2px 0 #805010; margin-bottom: 0.3rem; }
-  .done-message p { font-size: 0.45rem; color: #b89858; }
+  .done-message p { font-size: 0.45rem; color: #b89858; line-height: 1.7; }
+  .done-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.55rem; }
+  .done-actions .reset-btn { margin-top: 0; }
+  .share-btn {
+    padding: 0.5rem 1.2rem;
+    min-height: 44px;
+    background: #c08820;
+    border: 3px solid #805010;
+    color: #282018;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #805010;
+  }
+  .share-btn:hover { background: #e0a830; transform: translateY(-1px); box-shadow: 0 5px 0 #805010; }
+  .share-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #805010; }
   .hidden { display: none !important; }
   .kb-hint {
     display: none;
@@ -136,19 +169,57 @@
   @media (hover: hover) {
     .kb-hint { display: block; }
   }
+  button:focus-visible {
+    outline: 3px solid #f8d878;
+    outline-offset: 3px;
+  }
+  button { touch-action: manipulation; }
   .scanlines {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 100;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(40,32,24,0.04) 2px, rgba(40,32,24,0.04) 4px);
+  }
+  @media (max-width: 420px) {
+    h1 { font-size: clamp(0.9rem, 4.6vw, 1.1rem); }
+    .preset-btn { flex: 1 1 30%; padding-inline: 0.35rem; }
+    .presets { gap: 0.35rem; }
+  }
+  @media (orientation: landscape) and (max-height: 620px) and (min-width: 700px) {
+    main {
+      width: min(900px, 100%);
+      grid-template-areas: "scene brand" "scene panel";
+      grid-template-columns: minmax(320px, 1.35fr) minmax(280px, 0.85fr);
+      grid-template-rows: auto 1fr;
+      column-gap: 1.25rem;
+    }
+    canvas {
+      width: min(100%, calc((100dvh - 32px) * 4 / 3));
+      align-self: center;
+      justify-self: center;
+    }
+    .brand-block { align-self: end; }
+    .timer-display { margin-top: 0.55rem; }
+    .kb-hint { margin-top: 0.35rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
   }
 </style>
 </head>
 <body>
 <div class="scanlines" aria-hidden="true"></div>
 <main>
+<div class="brand-block">
 <h1>RICE FOCUS</h1>
 <p class="subtitle">~ pixel rice cooker timer ~</p>
-<canvas id="scene" width="480" height="360" aria-label="Pixel art rice cooker scene"></canvas>
+</div>
+<canvas id="scene" width="480" height="360" aria-label="Open pixel rice cooker waiting for a cooking time"></canvas>
+<section class="timer-panel" aria-label="Rice timer controls">
 <div class="timer-display" id="timerDisplay" role="timer" aria-live="off" aria-label="Cooking time remaining">25:00</div>
 <div class="timer-label" id="timerLabel" aria-live="polite">SET YOUR COOKING TIME</div>
 <div class="presets" id="presets" aria-label="Time presets">
@@ -165,16 +236,25 @@
 </div>
 <div class="done-message" id="doneMessage" role="status">
   <h2>RICE IS READY!</h2>
-  <p>Your perfectly cooked rice awaits</p>
-  <button class="reset-btn" onclick="resetAll()">COOK AGAIN</button>
+  <p>THE LITTLE COOKER KEPT WATCH.</p>
+  <div class="done-actions">
+    <button class="share-btn" id="shareBtn" onclick="shareFinish()">SHARE FINISH</button>
+    <button class="reset-btn" onclick="resetAll()">COOK AGAIN</button>
+  </div>
 </div>
 <p class="kb-hint" id="kbHint" aria-hidden="true">ARROWS: +/- TIME &nbsp;|&nbsp; ENTER: START</p>
+</section>
 </main>
 
 <script>
 // ===== CONSTANTS =====
 const S = 4;
 const GW = 120, GH = 90;
+const DEFAULT_SECONDS = 25 * 60;
+const STORAGE_KEY = 'rice-focus:last-duration:v1';
+const CANONICAL_URL = 'https://rice-cooker-timer.vercel.app/';
+const BASE_TITLE = 'Rice Focus | Pixel Rice Cooker Timer';
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = document.getElementById('scene');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
@@ -199,9 +279,10 @@ const C = {
 };
 
 // ===== STATE =====
-let totalSeconds = 25 * 60;
+let totalSeconds = loadSavedDuration();
 let remainingSeconds = totalSeconds;
 let timerInterval = null;
+let timerDeadlineMs = null;
 let animState = 'idle';
 let animStart = 0;
 let animFrame = 0;
@@ -221,6 +302,20 @@ let chimePlayed = false;
 let notesSpawned = [false, false, false];
 let doneMessageShown = false;
 let melodyPlayed = false;
+
+function loadSavedDuration() {
+  try {
+    const saved = Number.parseInt(localStorage.getItem(STORAGE_KEY), 10);
+    if (Number.isInteger(saved) && saved >= 60 && saved <= 5400) return saved;
+  } catch (_) {
+    // Storage can be unavailable in hardened browser modes. The timer still works.
+  }
+  return DEFAULT_SECONDS;
+}
+
+function saveDuration() {
+  try { localStorage.setItem(STORAGE_KEY, String(totalSeconds)); } catch (_) {}
+}
 
 // ===== HELPERS =====
 function px(x, y, color) {
@@ -477,11 +572,24 @@ function updateParticles() {
 // ===== AUDIO =====
 let audioCtx = null;
 function getAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) {
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return null;
+    try { audioCtx = new AudioCtor(); } catch (_) { return null; }
+  }
   return audioCtx;
+}
+async function activateAudio() {
+  const ctx = getAudio();
+  if (!ctx) return null;
+  if (ctx.state === 'suspended') {
+    try { await ctx.resume(); } catch (_) {}
+  }
+  return ctx;
 }
 function playTone(freq, start, dur, vol = 0.08) {
   const ctx = getAudio();
+  if (!ctx) return;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = 'square';
@@ -492,18 +600,20 @@ function playTone(freq, start, dur, vol = 0.08) {
   osc.start(start); osc.stop(start + dur);
 }
 function playStartChime() {
-  const ctx = getAudio(); const now = ctx.currentTime;
+  const ctx = getAudio();
+  if (!ctx) return;
+  const now = ctx.currentTime;
   playTone(523.25, now, 0.15, 0.06);
   playTone(659.25, now + 0.12, 0.15, 0.06);
   playTone(783.99, now + 0.24, 0.3, 0.06);
 }
 function playTwinkleTwinkle() {
-  const ctx = getAudio(); const now = ctx.currentTime;
+  const ctx = getAudio();
+  if (!ctx) return 0;
+  const now = ctx.currentTime;
   const [Cn, D, E, F, G, A] = [523.25, 587.33, 659.25, 698.46, 783.99, 880];
-  const t = 0.3, v = 0.07;
+  const t = 0.26, v = 0.1;
   const notes = [
-    Cn,Cn,G,G,A,A,G,0, F,F,E,E,D,D,Cn,0,
-    G,G,F,F,E,E,D,0, G,G,F,F,E,E,D,0,
     Cn,Cn,G,G,A,A,G,0, F,F,E,E,D,D,Cn
   ];
   notes.forEach((n, i) => { if (n > 0) playTone(n, now + i * t, t * 0.85, v); });
@@ -532,7 +642,7 @@ function animProgress() {
 }
 
 function updateAnimation() {
-  const t = animProgress();
+  const t = animProgress() / (reducedMotion ? 0.18 : 1);
 
   switch (animState) {
     case 'idle': lidOpen = true; break;
@@ -600,11 +710,8 @@ function updateAnimation() {
       if (p > 0.8 && !notesSpawned[2]) { spawnNote(BX + 18, BY - 20); notesSpawned[2] = true; }
       if (p >= 1) {
         startAnim('cooking');
-        startTimer();
         setLabel('COOKING...');
-        document.getElementById('controls').classList.add('hidden');
-        document.getElementById('presets').classList.add('hidden');
-        document.getElementById('kbHint').classList.add('hidden');
+        canvas.setAttribute('aria-label', 'Closed pixel rice cooker steaming while the timer counts down');
       }
       break;
     }
@@ -613,11 +720,11 @@ function updateAnimation() {
       const progress = (totalSeconds - remainingSeconds) / totalSeconds;
       const intensity = Math.min(1, progress * 1.5);
       const freq = Math.max(2, Math.floor(12 - intensity * 10));
-      if (animFrame % freq === 0) {
+      if (!reducedMotion && animFrame % freq === 0) {
         spawnSteam(BX + 16 + Math.random() * 12, BY - 14, 3 + intensity * 5);
       }
       // Extra puffs at higher intensity
-      if (intensity > 0.5 && animFrame % (freq + 2) === 0) {
+      if (!reducedMotion && intensity > 0.5 && animFrame % (freq + 2) === 0) {
         spawnSteam(BX + 14 + Math.random() * 16, BY - 12, 2 + intensity * 3);
       }
       break;
@@ -630,11 +737,14 @@ function updateAnimation() {
       if (p < 2 && animFrame % 5 === 0) {
         spawnSteam(BX + 15 + Math.random() * 14, BY - 16, 5 + Math.random() * 4);
       }
-      if (!melodyPlayed) { playTwinkleTwinkle(); melodyPlayed = true; }
-      if (p < 15 && animFrame % 18 === 0) {
+      if (!melodyPlayed) {
+        melodyPlayed = true;
+        activateAudio().then(function(ctx) { if (ctx) playTwinkleTwinkle(); });
+      }
+      if (!reducedMotion && p < 15 && animFrame % 18 === 0) {
         spawnNote(BX + 10 + Math.random() * 24, BY - 20 - Math.random() * 10);
       }
-      if (p < 5 && animFrame % 5 === 0) {
+      if (!reducedMotion && p < 5 && animFrame % 5 === 0) {
         spawnSparkle(Math.random() * GW, Math.random() * GH * 0.7);
       }
       if (!doneMessageShown && p > 1) {
@@ -670,7 +780,7 @@ function draw() {
   drawParticles();
 }
 
-// ===== GAME LOOP (setInterval for reliability) =====
+// ===== GAME LOOP =====
 function gameLoop() {
   animFrame++;
   updateAnimation();
@@ -678,7 +788,7 @@ function gameLoop() {
   draw();
 }
 
-// Use setInterval at ~30fps so it works even when tab isn't focused
+// The visual loop may throttle in a background tab. Timer truth is wall-clock based below.
 setInterval(gameLoop, 33);
 
 // ===== TIMER =====
@@ -687,21 +797,44 @@ function formatTime(s) {
   return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
+function renderTimer() {
+  const formatted = formatTime(remainingSeconds);
+  const timerDisplay = document.getElementById('timerDisplay');
+  timerDisplay.textContent = formatted;
+  timerDisplay.setAttribute('aria-label', `${formatted} remaining`);
+
+  if (animState === 'done') document.title = 'Rice is ready! | Rice Focus';
+  else if (timerDeadlineMs !== null) document.title = `${formatted} | Rice Focus`;
+  else document.title = BASE_TITLE;
+}
+
+function syncTimer() {
+  if (timerDeadlineMs === null) return;
+  remainingSeconds = Math.max(0, Math.ceil((timerDeadlineMs - Date.now()) / 1000));
+  renderTimer();
+  if (remainingSeconds === 0) finishCooking();
+}
+
 function startTimer() {
-  timerInterval = setInterval(() => {
-    remainingSeconds--;
-    document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
-    if (remainingSeconds <= 0) {
-      clearInterval(timerInterval);
-      finishCooking();
-    }
-  }, 1000);
+  clearInterval(timerInterval);
+  timerDeadlineMs = Date.now() + remainingSeconds * 1000;
+  syncTimer();
+  timerInterval = setInterval(syncTimer, 250);
 }
 
 function finishCooking() {
+  if (animState === 'done') return;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerDeadlineMs = null;
+  remainingSeconds = 0;
   startAnim('done');
   setLabel('');
+  showCup = false; showJug = false;
+  lidOpen = true; riceLevel = 1; waterLevel = 0;
   btnPressed = false; btnGlow = false;
+  canvas.setAttribute('aria-label', 'Open pixel rice cooker celebrating because the rice is ready');
+  renderTimer();
 }
 
 function setLabel(txt) {
@@ -713,7 +846,8 @@ let presetLabelTimer = null;
 function setTime(minutes) {
   if (animState !== 'idle') return;
   totalSeconds = minutes * 60; remainingSeconds = totalSeconds;
-  document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+  saveDuration();
+  renderTimer();
   // Flash confirmation in label area
   setLabel(minutes + ' MIN SET');
   if (presetLabelTimer) clearTimeout(presetLabelTimer);
@@ -726,18 +860,28 @@ function adjustTime(dir) {
   if (animState !== 'idle') return;
   totalSeconds = Math.max(60, Math.min(5400, totalSeconds + dir * 60));
   remainingSeconds = totalSeconds;
-  document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+  saveDuration();
+  renderTimer();
 }
 function startCooking() {
   if (animState !== 'idle') return;
+  activateAudio();
+  saveDuration();
   document.getElementById('startBtn').disabled = true;
+  document.getElementById('controls').classList.add('hidden');
+  document.getElementById('presets').classList.add('hidden');
+  document.getElementById('kbHint').classList.add('hidden');
+  canvas.setAttribute('aria-label', 'Pixel rice cooker preparing rice while the timer counts down');
   setLabel('PREPARING RICE...');
   startAnim('pour_rice');
+  startTimer();
 }
 function resetAll() {
   clearInterval(timerInterval);
-  animState = 'idle'; totalSeconds = 25 * 60; remainingSeconds = totalSeconds;
-  document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+  timerInterval = null;
+  timerDeadlineMs = null;
+  animState = 'idle'; totalSeconds = loadSavedDuration(); remainingSeconds = totalSeconds;
+  renderTimer();
   setLabel('SET YOUR COOKING TIME');
   document.getElementById('startBtn').disabled = false;
   document.getElementById('doneMessage').style.display = 'none';
@@ -751,6 +895,55 @@ function resetAll() {
   grains = []; steams = []; musicNotes = []; sparkles = [];
   chimePlayed = false; notesSpawned = [false, false, false];
   doneMessageShown = false; melodyPlayed = false;
+  canvas.setAttribute('aria-label', 'Open pixel rice cooker waiting for a cooking time');
+  resetShareFeedback();
+}
+
+let shareFeedbackTimer = null;
+function resetShareFeedback() {
+  if (shareFeedbackTimer) clearTimeout(shareFeedbackTimer);
+  shareFeedbackTimer = null;
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) shareBtn.textContent = 'SHARE FINISH';
+}
+
+function showShareFeedback(label) {
+  const shareBtn = document.getElementById('shareBtn');
+  if (!shareBtn) return;
+  if (shareFeedbackTimer) clearTimeout(shareFeedbackTimer);
+  shareBtn.textContent = label;
+  shareFeedbackTimer = setTimeout(resetShareFeedback, 1600);
+}
+
+function fallbackCopy(text) {
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', '');
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  area.select();
+  const copied = document.execCommand('copy');
+  area.remove();
+  return copied;
+}
+
+async function shareFinish() {
+  const text = 'My rice is ready. Timed with Rice Focus.';
+  const copyText = `${text} ${CANONICAL_URL}`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'Rice Focus', text, url: CANONICAL_URL });
+      showShareFeedback('SHARED');
+      return;
+    }
+    if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(copyText);
+    else if (!fallbackCopy(copyText)) throw new Error('Copy unavailable');
+    showShareFeedback('COPIED');
+  } catch (error) {
+    if (error && error.name === 'AbortError') return;
+    showShareFeedback('COPY FAILED');
+  }
 }
 
 // ===== KEYBOARD SUPPORT =====
@@ -789,6 +982,15 @@ document.addEventListener('keydown', function(e) {
       break;
   }
 });
+
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) syncTimer();
+});
+window.addEventListener('focus', syncTimer);
+window.addEventListener('pageshow', syncTimer);
+
+renderTimer();
+draw();
 </script>
 </body>
 </html>

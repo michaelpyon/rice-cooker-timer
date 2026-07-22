@@ -1,11 +1,11 @@
 # DESIGN - Rice Focus (source of truth)
 
-Product name and concept are fixed: **Rice Focus**, a pixel-art rice cooker countdown timer. Single static index.html, no build step, no external deps beyond Google Fonts. Any redesign that adds a framework, a bundler, or a network dependency is a regression.
+Product name and concept are fixed: **Rice Focus**, a pixel-art rice cooker countdown timer. The release is 3 static files: `index.html`, `og-image.png`, and `favicon.svg`. There is no app build step, framework, backend, account, analytics, or runtime network dependency beyond Google Fonts. Adding those is a regression.
 
 ## Layout / IA intent
 
-- 1 page, 1 centered column, everything visible without scrolling on a phone in portrait. Order top to bottom: title + subtitle, pixel-cooker canvas (the hero), countdown display, status label, presets row, +/- adjuster, start/reset controls, keyboard hint (hover-capable devices only), tiny footer.
-- The canvas is the hero and the mascot. Nothing may ever cover it, push it below the fold on a 375px-wide viewport, or shrink it to make room for new UI.
+- 1 page, 1 centered cartridge in portrait, everything visible without horizontal scrolling. Order top to bottom: title + subtitle, pixel-cooker canvas, countdown, status, presets, +/- adjuster, start/reset controls, keyboard hint on hover-capable devices.
+- The canvas is the hero and mascot. Scale it uniformly on narrow phones and pair it with the controls in a 2-column cartridge on short landscape screens. Never crop or cover it.
 - No nav, no secondary pages, no footer link farm. If a feature needs a second page, it does not belong in this product.
 - Touch targets stay at 44px minimum (already true; protect it).
 
@@ -17,15 +17,15 @@ The product IS the landing page. No marketing section, no feature list. The cook
 
 1. **Idle / set**: face awake, presets and adjuster active, subtle idle animation (blink or steam wisp) so the page never looks dead in a screenshot.
 2. **Starting**: pour rice, add water, close lid sequence + start chime. This is the "it responded to me" moment; it must run on the same tap that starts the timer (which also unlocks Web Audio).
-3. **Cooking**: countdown in golden tabular digits, cooker bubbles/steams in stepped frames, controls recede (dim, do not vanish). Tab-title should mirror the remaining time (e.g. "12:40 - Rice Focus") so a backgrounded tab still does its job.
+3. **Cooking**: countdown in golden tabular digits, cooker bubbles/steams in stepped frames, setup controls leave the interaction path, and the tab title mirrors remaining time (for example, "12:40 | Rice Focus"). Timer truth comes from an absolute wall-clock deadline set on the START tap, not interval tick counts.
 4. **Done / celebration**: "RICE IS READY!", face lights up, steam burst, Twinkle Twinkle chiptune. Hold this state until the user acts; never auto-reset. This is the screenshot frame.
-5. **Post-done**: reset control + (planned bet) a SHARE affordance with pre-filled post text and URL.
+5. **Post-done**: SHARE FINISH uses native sharing when available and a clipboard fallback otherwise. COOK AGAIN restores the last valid duration.
 
 ## Empty / loading / error state intent
 
 - **Empty**: none in the classic sense; idle IS the empty state and must be charming on its own.
 - **Loading**: near-zero by design (1 file). The only loading risk is the Google Font; treat font flash as a bug (subset/inline or swap strategy per BRAND.md).
-- **Error**: only 1 real failure mode exists, blocked/undelivered audio. Web Audio must be created inside the start-tap gesture; if the context is suspended or the tab was asleep at 0:00, show an unmissable visual finish (full-screen-ish flash of the celebration frame + document.title "RICE IS READY!") so silence never means a missed alert. No network errors are possible; keep it that way (fully offline after first load).
+- **Error**: the main failure mode is blocked or suspended audio. Web Audio is created and resumed inside the START gesture. The timer still reconciles from wall-clock time on `visibilitychange`, `focus`, and `pageshow`, then holds an unmissable visual finish and "Rice is ready! | Rice Focus" tab title even if sound cannot play.
 - **Reduced motion**: honor prefers-reduced-motion with fewer frames, but never remove the finish alert.
 
 ## Metadata / OG intent (X-readiness, mandatory)
@@ -33,7 +33,7 @@ The product IS the landing page. No marketing section, no feature list. The cook
 - Full OG + Twitter card set already exists and is correct in structure: og:title, og:description, 1200x630 og-image.png, summary_large_image, canonical. Keep PNG (scrapers do not render SVG; this was already fixed in commit 808a03b).
 - OG image intent: the celebration frame, not the idle frame. The image should show the cooker with its lit face, steam, and "RICE IS READY!" in golden Press Start 2P on the dark brown field, so the X card itself sells the payoff. Verify og-image.png matches current art; regenerate from the canvas art if it drifted.
 - Copy intent: og:description leads with the toy, not the utility ("cute pixel-art rice cooker... chiptune sounds" is on-voice; keep that register).
-- Title stays "Rice Focus - Pixel Rice Cooker Timer" (name preserved, keyword honest).
+- Title stays "Rice Focus | Pixel Rice Cooker Timer" (name preserved, keyword honest).
 
 ## Screenshot-worthy moment to engineer
 
@@ -43,12 +43,12 @@ The 4 seconds after 0:00. Engineering targets: (a) the celebration must look com
 
 This product makes no real-data claims: no APIs, no fetch, no "live" or "updated" language, no fabricated stats. Cook times are presented as friendly presets, not sourced authority; keep it that way (do not add "chef-approved" or similar without a source). Nothing requires disclosure.
 
-**Deploy truth (as of 2026-07-08)**: the live URL serves a stale build behind repo HEAD (6a740a9). Verified by diff: live is missing rice-variety sublabels (2590b41), keyboard shortcuts (54f4399), and the preset "XX MIN SET" flash + keyboard hint (6a740a9). OG tags and og-image.png ARE live. Before any X post, Michael must redeploy so the served page matches HEAD; no code fix needed.
+**Deploy truth (2026-07-22 gate)**: the prior live URL is stale relative to this relaunch branch. The new release has not passed until 2 consecutive clean production builds match, the exact prebuilt artifact is deployed to `rice-cooker-timer.vercel.app`, the stable URL passes the same browser matrix, and private-path probes return 404.
 
 ## Carried-forward build queue (from SUGGESTIONS.md, still valid)
 
-1. Share button in the done state (M) - highest leverage for the X launch
-2. Persist last-used time in localStorage (S)
-3. Pause/resume mid-cook (M)
-4. Sound toggle persisted to localStorage (M)
-5. 60-min WILD/black rice preset after verifying a sensible default time (S-M)
+1. Share button in the done state: SHIPPED
+2. Persist last-used time in localStorage: SHIPPED
+3. Pause/resume mid-cook: deferred, not a release blocker
+4. Sound toggle persisted to localStorage: deferred; the current persona values a loud finish
+5. 60-min WILD/black rice preset: deferred until the default time is sourced and labeled honestly

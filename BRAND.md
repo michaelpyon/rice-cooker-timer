@@ -4,7 +4,7 @@
 
 "The little pixel rice cooker that times your rice and sings when it's done."
 
-Secondary framing for the X post: a tiny, offline, single-file web toy that happens to be a genuinely good kitchen timer. Lead with the little guy, not with "timer app."
+Secondary framing for the X post: a tiny, single-page web toy that happens to be a genuinely good kitchen timer. Lead with the little guy, not with "timer app."
 
 ## Palette direction
 
@@ -37,7 +37,7 @@ Keep and defend the existing warm 8-bit kitchen palette. It is already distincti
 2. No exclamation inflation: 1 exclamation mark max, and only at the finish.
 3. Never claim authority on cook times. Presets are friendly defaults ("SUSHI", "BROWN"), not culinary law.
 4. No growth language anywhere: no "sign up", "pro", "unlock", "streak". This is a gift, not a funnel.
-5. README and meta copy can be first-person and modest: "One page, no dependencies, works offline after first load" is exactly the right register.
+5. README and meta copy should stay modest: "One page, no account, no backend" is the right register. Do not claim offline support while the page still loads its font from Google Fonts.
 
 ## 3 reference products to measure taste against
 
